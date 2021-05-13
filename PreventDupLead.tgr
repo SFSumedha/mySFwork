@@ -1,0 +1,30 @@
+trigger PreventDupLead on Lead (before update) {
+ 
+    //create set to store email ids of all records that are being created. 
+    set <String> leadEmailSet = new set<String>();
+    
+    // Here we are iterating through each lead record, then we will add email id of each lead to the set.
+    for(Lead aLead : trigger.new)
+    {
+        leadEmailSet.add(aLead.Email);
+        
+     }
+    // here the blank list will hold LeadId of existing leads.
+    List <Lead> leadList = new List <Lead>();
+    
+    /** Using SOQL, above list will now contain ids of existing records whose email matches with the email of the records being created.  **/
+    leadList = [SELECT Email FROM Lead WHERE Email IN : leadEmailSet];
+    
+    // Iterate through each record that's being created and display error. If the size of the list is greater than 0 then it's the duplicate record. 
+    for (Lead lLead : trigger.new)
+    {
+        
+        if(leadList.size()> 0)
+        {
+            lLead.addError('Duplicate Lead');
+            
+        }      
+        
+    }
+       
+}
