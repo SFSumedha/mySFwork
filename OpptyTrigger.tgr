@@ -1,0 +1,20 @@
+trigger OpptyTrigger on Opportunity (before update) {
+
+   set <Id> accountIds = new set<Id>(); //get all account ids 
+   Map <Id, Account>accountIdsMap = new Map<Id,Account>();
+    for(Opportunity oppty  : trigger.new ){
+        
+        accountIds.add(oppty.AccountId); 
+                                    }
+    
+    Date todaysDate =   System.today(); // This gives today’s date
+    List<Opportunity> oppListToClose = [SELECT Id FROM Opportunity WHERE AccountId IN: accountIds 
+                                         AND StageName !='Closed' AND CloseDate <: todaysDate];
+    
+    for(Opportunity opty : oppListtoClose){
+        opty.StageName='Closed'; //  standard values like Closed/Won or Closed/Lost should be used
+       //opty.RecordTypeId= ' 0125e000000DLNqAAO ';
+       opty.Shipping_Address__c= accountIdsMap.get(opty.AccountId).Shipping_Address__c;	 
+
+}
+}
